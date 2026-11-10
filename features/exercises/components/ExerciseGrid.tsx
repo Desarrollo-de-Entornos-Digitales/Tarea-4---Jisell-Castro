@@ -1,7 +1,11 @@
+
 import { getExercises, type ExerciseFilters } from '../services/exercises.service';
 import { ExerciseCard } from './ExerciseCard';
 
-export async function ExerciseGrid({ q, category }: ExerciseFilters) {
+export async function ExerciseGrid({
+    q,
+    category,
+}: ExerciseFilters = {}) {
     const exercises = await getExercises({ q, category });
 
     if (exercises.length === 0) {
@@ -16,7 +20,10 @@ export async function ExerciseGrid({ q, category }: ExerciseFilters) {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {exercises.map((exercise, index) => (
                 <li key={exercise.id}>
-                    <ExerciseCard exercise={exercise} priority={index < 3} />
+                    <ExerciseCard
+                        exercise={exercise}
+                        priority={index < 3}
+                    />
                 </li>
             ))}
         </ul>
