@@ -33,6 +33,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         >
                             Dashboard
                         </Link>
+
+                        <Link
+                            href="/exercises"
+                            className={`btn btn-ghost btn-sm ${pathname.startsWith('/exercises') ? 'btn-active font-bold' : ''}`}
+                        >
+                            Ejercicios
+                        </Link>
                     </nav>
 
                     <div className="flex items-center gap-3">
