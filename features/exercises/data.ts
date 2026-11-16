@@ -1,7 +1,7 @@
 import type { Category, Exercise } from './types';
 
 // Colores de la marca por categoría (sin el #)
-const COLORS: Record<Category, string> = { fuerza: '5454e9', cardio: 'e9683b', movilidad: '4cb979' };
+export const COLORS: Record<Category, string> = { fuerza: '5454e9', cardio: 'e9683b', movilidad: '4cb979' };
 
 // Imagen de relleno: tamaño, color de fondo y de texto, formato y el texto que muestra
 const img = (category: Category, text: string) =>

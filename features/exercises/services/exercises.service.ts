@@ -7,18 +7,32 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export interface ExerciseFilters {
     q?: string;
     category?: string;
+    duration?: string;
 }
+
 
 export async function getExercises(filters: ExerciseFilters = {}): Promise<Exercise[]> {
     await delay(800);
 
     const q = filters.q?.trim().toLowerCase();
+    const maxDuration = filters.duration ? Number(filters.duration) : undefined;
+
     return EXERCISES.filter((exercise) => {
-        const matchesText = !q || exercise.name.toLowerCase().includes(q) || exercise.muscle.toLowerCase().includes(q);
-        const matchesCategory = !filters.category || exercise.category === (filters.category as Category);
-        return matchesText && matchesCategory;
+        const matchesText =
+            !q ||
+            exercise.name.toLowerCase().includes(q) ||
+            exercise.muscle.toLowerCase().includes(q);
+
+        const matchesCategory =
+            !filters.category || exercise.category === (filters.category as Category);
+
+        const matchesDuration =
+            maxDuration === undefined || exercise.durationMin <= maxDuration;
+
+        return matchesText && matchesCategory && matchesDuration;
     });
 }
+
 
 export async function getExerciseById(id: number): Promise<Exercise | null> {
     await delay(300);
