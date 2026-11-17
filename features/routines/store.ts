@@ -1,8 +1,12 @@
+
 import type { Level, Routine, RoutineInput } from './types';
 
-// En desarrollo, Next vuelve a evaluar los módulos al guardar un archivo. Guardar la lista en
-// globalThis evita que se reinicie. En un proyecto real aquí iría una base de datos.
-const globalForRoutines = globalThis as unknown as { routines?: Routine[] };
+// En desarrollo, Next vuelve a evaluar los módulos al guardar un archivo.
+// globalThis evita que la lista se reinicie.
+// En un proyecto real aquí iría una base de datos.
+const globalForRoutines = globalThis as unknown as {
+    routines?: Routine[];
+};
 
 const routines: Routine[] = (globalForRoutines.routines ??= [
     {
@@ -41,15 +45,30 @@ export const routinesStore = {
             exerciseIds: input.exerciseIds,
             doneIds: [],
         };
+
         routines.push(routine);
         return routine;
     },
 
     toggleDone(id: number, exerciseId: number): void {
         const routine = routines.find((r) => r.id === id);
+
         if (!routine) return;
+
         routine.doneIds = routine.doneIds.includes(exerciseId)
             ? routine.doneIds.filter((done) => done !== exerciseId)
             : [...routine.doneIds, exerciseId];
     },
+
+    // Elimina una rutina por su ID
+    remove(id: number): void {
+        const index = routines.findIndex(
+            (routine) => routine.id === id
+        );
+
+        if (index !== -1) {
+            routines.splice(index, 1);
+        }
+    },
 };
+    
