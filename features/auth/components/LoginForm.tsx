@@ -1,26 +1,39 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '../services/auth.service';
+import { useSessionStore } from '@/shared/store/session.store';
 
 export function LoginForm() {
     const router = useRouter();
+    const setUser = useSessionStore((state) => state.setUser);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.SubmitEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setErrorMessage(null);
         setIsLoading(true);
 
         try {
-            await authService.login({ email, password });
+            const user = await authService.login({
+                email,
+                password,
+            });
+
+            setUser(user);
             router.replace('/dashboard');
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Error inesperado al iniciar sesión');
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : 'Error inesperado al iniciar sesión',
+            );
         } finally {
             setIsLoading(false);
         }
@@ -29,7 +42,9 @@ export function LoginForm() {
     return (
         <section>
             <h1 className="text-2xl font-bold mb-1">Iniciar Sesión</h1>
-            <p className="text-sm opacity-70 mb-4">Ingresa tus credenciales para acceder.</p>
+            <p className="text-sm opacity-70 mb-4">
+                Ingresa tus credenciales para acceder.
+            </p>
 
             {errorMessage && (
                 <div role="alert" className="alert alert-error text-sm mb-4">
@@ -40,7 +55,9 @@ export function LoginForm() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <fieldset disabled={isLoading} className="flex flex-col gap-3">
                     <div>
-                        <label className="label text-sm" htmlFor="login-email">Correo electrónico</label>
+                        <label className="label text-sm" htmlFor="login-email">
+                            Correo electrónico
+                        </label>
                         <input
                             id="login-email"
                             type="email"
@@ -53,7 +70,9 @@ export function LoginForm() {
                     </div>
 
                     <div>
-                        <label className="label text-sm" htmlFor="login-password">Contraseña</label>
+                        <label className="label text-sm" htmlFor="login-password">
+                            Contraseña
+                        </label>
                         <input
                             id="login-password"
                             type="password"

@@ -1,23 +1,63 @@
-import { api } from '@/shared/lib/api';
-import { useSessionStore } from '@/shared/store/session.store';
+
 import { useNotificationsStore } from '@/features/notifications/store/notifications.store';
-import { LoginCredentials, LoginResponse, RegisterData, User } from '../types';
+import {
+    LoginCredentials,
+    RegisterData,
+    User,
+} from '../types';
 
 export const authService = {
-    // 1. Iniciar sesión: extrae access_token del objeto de respuesta y lo guarda en session
-    async login(credentials: LoginCredentials): Promise<string> {
-        const res = await api.post<LoginResponse>('/auth/login', credentials);
-        useSessionStore.getState().setToken(res.access_token);
-        useNotificationsStore.getState().addNotification('Inicio de sesión exitoso');
-        return res.access_token;
+    async login(credentials: LoginCredentials): Promise<User> {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentials),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Error al iniciar sesión');
+        }
+
+        useNotificationsStore
+            .getState()
+            .addNotification('Inicio de sesión exitoso');
+
+        return result.user as User;
     },
 
     async register(data: RegisterData): Promise<User> {
-        return api.post<User>('/users', data);
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Error al registrar la cuenta');
+        }
+
+        return result.user as User;
     },
 
-    logout(): void {
-        useSessionStore.getState().clearSession();
-        useNotificationsStore.getState().addNotification('Sesión cerrada');
+    async logout(): Promise<void> {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudo cerrar la sesión');
+        }
+
+        useNotificationsStore
+            .getState()
+            .addNotification('Sesión cerrada');
     },
 };

@@ -1,25 +1,41 @@
+
 'use client';
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
 import { AuthGuard } from '@/features/auth/components/AuthGuard';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { useSessionStore } from '@/shared/store/session.store';
+import { toggleThemeAction } from '@/shared/actions/theme';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout({
+    children,
+    modal,
+}: {
+    children: React.ReactNode;
+    modal: React.ReactNode;
+}) {
     const pathname = usePathname();
     const router = useRouter();
+    const clearSession = useSessionStore((state) => state.clearSession);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    // Restaurar la sesión de localStorage una sola vez al montar el layout
-    useEffect(() => {
-        useSessionStore.persist.rehydrate();
-    }, []);
+    const handleLogout = async () => {
+        if (isLoggingOut) return;
 
-    const handleLogout = () => {
-        authService.logout();
-        router.replace('/login');
+        setIsLoggingOut(true);
+
+        try {
+            await authService.logout();
+            clearSession();
+            router.replace('/login');
+            router.refresh();
+        } catch (error) {
+            console.error('Error cerrando sesión:', error);
+            setIsLoggingOut(false);
+        }
     };
 
     return (
@@ -40,23 +56,43 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         >
                             Ejercicios
                         </Link>
+
+                        <Link
+                            href="/routines"
+                            className={`btn btn-ghost btn-sm ${pathname.startsWith('/routines') ? 'btn-active font-bold' : ''}`}
+                        >
+                            Rutinas
+                        </Link>
                     </nav>
 
                     <div className="flex items-center gap-3">
-                        {/* Campana de notificaciones reactiva de DaisyUI */}
                         <NotificationBell />
+
+                        <form action={toggleThemeAction}>
+                            <button
+                                type="submit"
+                                className="btn btn-ghost btn-sm"
+                            >
+                                Cambiar tema
+                            </button>
+                        </form>
 
                         <button
                             type="button"
                             onClick={handleLogout}
+                            disabled={isLoggingOut}
                             className="btn btn-outline btn-error btn-sm"
                         >
-                            Cerrar Sesión
+                            {isLoggingOut ? 'Cerrando...' : 'Cerrar Sesión'}
                         </button>
                     </div>
                 </header>
 
-                <main className="max-w-4xl mx-auto p-6">{children}</main>
+                <main className="max-w-4xl mx-auto p-6">
+                    {children}
+                </main>
+
+                {modal}
             </div>
         </AuthGuard>
     );

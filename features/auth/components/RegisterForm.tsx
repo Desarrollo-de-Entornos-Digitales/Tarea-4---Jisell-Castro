@@ -21,8 +21,7 @@ export function RegisterForm() {
             await authService.register({
                 username,
                 email,
-                passwordHash: password,
-                roleId: 1,
+                password
             });
 
             router.push('/login');

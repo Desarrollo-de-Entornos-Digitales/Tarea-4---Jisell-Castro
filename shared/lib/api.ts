@@ -1,21 +1,19 @@
-import { useSessionStore } from '@/shared/store/session.store';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 function getHeaders(): HeadersInit {
-    const token = useSessionStore.getState().token;
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
+    return {
+        'Content-Type': 'application/json',
+    };
 }
 
 export const api = {
     // GET: consulta y retorna el JSON tipado
     async get<T>(endpoint: string): Promise<T> {
         const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'GET',
             headers: getHeaders(),
+            credentials: 'include',
         });
 
         if (!res.ok) {
@@ -30,6 +28,7 @@ export const api = {
         const res = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: getHeaders(),
+            credentials: 'include',
             body: JSON.stringify(body),
         });
 
